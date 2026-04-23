@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartGuard AI - Fraud Detection Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <nav class="bg-blue-600 p-4 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">🛡️ SmartGuard AI</h1>
+            <span class="text-sm bg-blue-700 px-3 py-1 rounded">Datathon 2026 Prototype</span>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 p-4">
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold">Monitoring Transaksi Real-Time</h2>
+            <p class="text-gray-600">Prototipe antarmuka untuk hasil analisis dari model fraud_analysis.py</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <h3 class="font-bold mb-4">Simulasi Input Transaksi</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium">Jumlah Transaksi (Rp)</label>
+                        <input id="amount" type="number" placeholder="Contoh: 500000" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Lokasi</label>
+                        <select id="location" class="w-full border rounded-lg p-2 mt-1">
+                            <option value="Jakarta">Jakarta</option>
+                            <option value="Papua">Papua</option>
+                            <option value="Luar Negeri">Luar Negeri</option>
+                        </select>
+                    </div>
+                    <button onclick="analyzeTransaction()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Analisis Sekarang</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 md:col-span-2">
+                <h3 class="font-bold mb-4">Hasil Deteksi AI</h3>
+                <div id="resultBox" class="hidden p-4 rounded-lg text-center border-2 mb-4">
+                    <p id="resultText" class="font-bold text-lg"></p>
+                    <p id="resultReason" class="text-sm mt-1"></p>
+                </div>
+                <div class="h-64">
+                    <canvas id="transactionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+            <h3 class="font-bold mb-4">Log Deteksi Sistem</h3>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="p-3 border">Waktu</th>
+                        <th class="p-3 border">Jumlah</th>
+                        <th class="p-3 border">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionLog">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Logika simulasi dashboard
+        function analyzeTransaction() {
+            const amount = document.getElementById('amount').value;
+            const location = document.getElementById('location').value;
+            const resultBox = document.getElementById('resultBox');
+            const resultText = document.getElementById('resultText');
+            const resultReason = document.getElementById('resultReason');
+            const logTable = document.getElementById('transactionLog');
+
+            if (!amount) return;
+
+            resultBox.classList.remove('hidden');
+            let isFraud = (amount > 5000000 || location === "Luar Negeri");
+
+            if (isFraud) {
+                resultBox.className = "p-4 rounded-lg text-center border-2 border-red-500 bg-red-50 text-red-700";
+                resultText.innerText = "🚨 TERDETEKSI FRAUD";
+                resultReason.innerText = "Pola transaksi mencurigakan dideteksi oleh SmartGuard AI.";
+            } else {
+                resultBox.className = "p-4 rounded-lg text-center border-2 border-green-500 bg-green-50 text-green-700";
+                resultText.innerText = "✅ TRANSAKSI AMAN";
+                resultReason.innerText = "Transaksi diverifikasi normal.";
+            }
+
+            const now = new Date().toLocaleTimeString();
+            logTable.innerHTML = `<tr>
+                <td class="p-3 border">${now}</td>
+                <td class="p-3 border">Rp ${parseInt(amount).toLocaleString()}</td>
+                <td class="p-3 border ${isFraud ? 'text-red-600' : 'text-green-600'} font-bold">${isFraud ? '⚠ Fraud' : '✓ Normal'}</td>
+            </tr>` + logTable.innerHTML;
+        }
+
+        // Inisialisasi Grafik
+        const ctx = document.getElementById('transactionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['10m', '8m', '6m', '4m', '2m', 'Sekarang'],
+                datasets: [{
+                    label: 'Volume Transaksi',
+                    data: [10, 25, 15, 30, 20, 35],
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    </script>
+</body>
+</html>
